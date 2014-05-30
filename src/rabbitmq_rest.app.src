@@ -1,0 +1,8 @@
+{application, rabbitmq_rest,
+ [{description, "Embedded Rabbit REST"},
+  {vsn, "1.0.0"},
+  {modules, []},
+  {registered, []},
+  {mod, {rabbitmq_rest, []}},
+  {env, []},
+  {applications, [kernel, stdlib, crypto, ranch, cowlib, cowboy]}]}.
