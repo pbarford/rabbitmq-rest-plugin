@@ -38,9 +38,10 @@ handle_call(_Msg, _From, State) ->
 
 handle_cast({send, Body, Headers}, State = #state{channel = Channel}) ->
     io:format("rabbitmq_msg cast~n"),
-    Properties = #'P_basic'{content_type = <<"text/plain">>, delivery_mode = 1},
+%    Properties = #'P_basic'{content_type = <<"text/plain">>, delivery_mode = 1},
+    Properties1 = #'P_basic'{content_type = <<"text/plain">>, delivery_mode=1,headers = map_http_headers(Headers)},
     BasicPublish = #'basic.publish'{exchange = <<"restInbound">>, routing_key = <<"">>},
-    Content = #amqp_msg{props = Properties, payload = Body},
+    Content = #amqp_msg{props = Properties1, payload = Body},
     amqp_channel:call(Channel, BasicPublish, Content),    
     {noreply, State};
 
@@ -57,6 +58,9 @@ terminate(_, #state{channel = Channel}) ->
 
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
+
+map_http_headers(HttpHeaders) ->
+    lists:map(fun({K , V}) -> {K, longstr, V} end, HttpHeaders).
 
 %---------------------------
 

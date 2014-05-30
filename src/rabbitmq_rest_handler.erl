@@ -58,8 +58,9 @@ validHeader(Header) ->
 		     <<"user-agent">>,
 		     <<"cookie">>,
 		     <<"origin">>,
-		     <<"accept">>,
-		     <<"accept-encoding">>,
+		     <<"host">>,
+                 <<"accept">>,
+	           <<"accept-encoding">>,
 		     <<"accept-language">>],
   isHeaderValid(Header, HeadersToIgnore).
 
