@@ -8,18 +8,26 @@
 start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, _Arg = []).
 
-start_listeners() ->   
-  Dispatch = [
-        {'_', [
-			  {[<<"restmq">>, '...'], rabbitmq_rest_handler, []}
-            ]}
-    ],
-    cowboy:start_listener(my_http_listener, 1,
-        cowboy_tcp_transport, [{port, 4040}],
-        cowboy_http_protocol, [{dispatch, Dispatch}]
-    ),
-    rabbitmq_msg:start_link(). 
+start_listeners() ->
+  Dispatch =
+    cowboy_router:compile(
+      [ {'_',
+          [
+            {<<"/restmq">>, rabbitmq_rest_handler, []}
+          ]
+        }
+      ]),
 
+  RanchOptions =
+    [ {port, 4040}
+    ],
+  CowboyOptions =
+    [ {env,       [{dispatch, Dispatch}]}
+    , {compress,  true}
+    , {timeout,   12000}
+    ],
+  rabbitmq_msg:start_link(),  
+  cowboy:start_http(rabbitmq_rest_http, 20, RanchOptions, CowboyOptions).
 
 init([]) ->
     ok = pg2:create(rabbitmq_rest_listeners),

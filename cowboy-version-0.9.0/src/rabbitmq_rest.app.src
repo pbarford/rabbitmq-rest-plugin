@@ -5,4 +5,4 @@
   {registered, []},
   {mod, {rabbitmq_rest, []}},
   {env, []},
-  {applications, [kernel, stdlib, cowboy, rabbit, amqp_client]}]}.
+  {applications, [kernel, stdlib, crypto, ranch, cowlib, cowboy]}]}.

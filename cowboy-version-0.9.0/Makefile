@@ -34,7 +34,7 @@ run: quick
 	else ${RUN} -s rabbitmq_rest; \
 	fi
 
-cowboy: all
+cowboy: all cowlib ranch
 	mkdir -p $(DIST_DIR)/cowboy-$(COWBOY_VERSION)/ebin
 	mkdir -p $(DIST_DIR)/cowboy-$(COWBOY_VERSION)/include
 	cp ./$(DEPS_DIR)/cowboy/ebin/* $(DIST_DIR)/cowboy-$(COWBOY_VERSION)/ebin
