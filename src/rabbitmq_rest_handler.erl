@@ -10,7 +10,7 @@ handle(Req, State) ->
 	    {ok, R} = handle_post(Req),
             R;
         _ ->
-            {ok, R} = cowboy_http_req:reply(405, [], <<"Method not allowed">>, Req),
+            {ok, R} = cowboy_http_req:reply(405, Req),
             R
     end,
     {ok, Reply, State}.
@@ -29,7 +29,7 @@ handle_post(Req) ->
 %   io:format("MsgHeaders: '~p'~n", [MsgHeaders]),
 %   io:format("adding message: '~p'~n", [Body]),
    {Code, Text} = rabbitmq_msg:send(ContentType, Body, MsgHeaders),
-   cowboy_http_req:reply(Code, [], Text, Req3).
+   cowboy_http_req:reply(Code, Req3).
 
 terminate(_Req, _State) ->
     ok.
