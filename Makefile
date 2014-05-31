@@ -17,8 +17,12 @@ package: all
 	cp ./ebin/* $(DIST_DIR)/$(PACKAGE_NAME)-$(PACKAGE_VERSION)/ebin
 	cd $(DIST_DIR) && zip -q -r ./$(PACKAGE_NAME)-$(PACKAGE_VERSION).ez ./$(PACKAGE_NAME)-$(PACKAGE_VERSION)
 
-all:
-	${REBAR} get-deps compile
+get_deps:
+	${REBAR} get-deps
+	rm ./deps/cowboy/src/cowboy_http_websocket.erl
+
+all:    get_deps
+	${REBAR} compile
 
 quick:
 	${REBAR} skip_deps=true compile
