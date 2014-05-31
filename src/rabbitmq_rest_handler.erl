@@ -16,17 +16,20 @@ handle(Req, State) ->
     {ok, Reply, State}.
 
 handle_post(Req) ->
-   io:format("COWBOY handle_post~n"),
+%   io:format("COWBOY handle_post~n"),
    {ok, Body, Req1} = cowboy_http_req:body(Req),    
-   io:format("COWBOY headers~n"),
+%   io:format("COWBOY headers~n"),
    {HttpHeaders, Req2} = cowboy_http_req:headers(Req1),     
-   io:format("HttpHeaders-Count: '~p'~n", [length(HttpHeaders)]),
-   io:format("HttpHeaders: '~p'~n", [HttpHeaders]),
+   {CT, Req3} = cowboy_http_req:parse_header('Content-Type', Req2),
+   ContentType = erlang:iolist_to_binary([element(1,CT), <<"/">>, element(2,CT)]),
+%   io:format("Content-Type: '~p'~n", [ContentType]),
+%   io:format("HttpHeaders-Count: '~p'~n", [length(HttpHeaders)]),
+%   io:format("HttpHeaders: '~p'~n", [HttpHeaders]),
    MsgHeaders = lists:filter(fun({K , _}) -> validHeader(K) end , HttpHeaders),
-   io:format("MsgHeaders: '~p'~n", [MsgHeaders]),
-   io:format("adding message: '~p'~n", [Body]),
-   {Code, Text} = rabbitmq_msg:send(Body, MsgHeaders),
-   cowboy_http_req:reply(Code, [], Text, Req2).
+%   io:format("MsgHeaders: '~p'~n", [MsgHeaders]),
+%   io:format("adding message: '~p'~n", [Body]),
+   {Code, Text} = rabbitmq_msg:send(ContentType, Body, MsgHeaders),
+   cowboy_http_req:reply(Code, [], Text, Req3).
 
 terminate(_Req, _State) ->
     ok.
@@ -38,7 +41,7 @@ t(K) ->
   end.
 
 validHeader(Header) ->
-	io:format("validHeader: '~p'~n", [Header]),
+%  io:format("validHeader: '~p'~n", [Header]),
   HeadersToIgnore = [<<"connection">>,
 				<<"content-type">>,
 				<<"content-length">>,

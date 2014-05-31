@@ -11,7 +11,7 @@
          terminate/2,
          code_change/3]).
 
--export([send/2]).
+-export([send/3]).
 
 -include("amqp_client.hrl").
 
@@ -32,9 +32,9 @@ init([]) ->
                                                    type = <<"direct">>}),
     {ok, #state{channel = Channel}}.
 
-handle_call({send, Body, Headers}, _From, State = #state{channel = Channel}) ->
-    io:format("rabbitmq_msg call~n"),
-    Properties = #'P_basic'{content_type = <<"text/plain">>, delivery_mode=1,headers = map_http_headers(Headers)},
+handle_call({send, ContentType, Body, Headers}, _From, State = #state{channel = Channel}) ->
+%    io:format("rabbitmq_msg call~n"),
+    Properties = #'P_basic'{content_type = ContentType, delivery_mode=1,headers = map_http_headers(Headers)},
     BasicPublish = #'basic.publish'{exchange = <<"restInbound">>, routing_key = <<"">>},
     Content = #amqp_msg{props = Properties, payload = Body},
     amqp_channel:call(Channel, BasicPublish, Content),    
@@ -50,7 +50,7 @@ handle_info(_Info, State) ->
     {noreply, State}.
 
 terminate(_, #state{channel = Channel}) ->
-    io:format("rabbitmq_msg terminate~n"),
+%    io:format("rabbitmq_msg terminate~n"),
     amqp_channel:call(Channel, #'channel.close'{}),
     ok.
 
@@ -62,7 +62,7 @@ map_http_headers(HttpHeaders) ->
 
 %---------------------------
 
-send(Body, Headers) ->
-    io:format("rabbitmq_msg send~n"),
-    gen_server:call({global, ?MODULE}, {send, Body, Headers}).
+send(ContentType, Body, Headers) ->
+%    io:format("rabbitmq_msg send~n"),
+    gen_server:call({global, ?MODULE}, {send, ContentType, Body, Headers}).
 
