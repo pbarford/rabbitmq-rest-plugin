@@ -38,7 +38,7 @@ handle_call({send, ContentType, Body, Headers}, _From, State = #state{channel = 
     BasicPublish = #'basic.publish'{exchange = <<"restInbound">>, routing_key = <<"">>},
     Content = #amqp_msg{props = Properties, payload = Body},
     amqp_channel:call(Channel, BasicPublish, Content),    
-    {reply, {201, <<"">>}, State};
+    {reply, {201, <<"message put onto rabbit">>}, State};
 
 handle_call(_Msg, _From, State) ->
     {reply, unknown_command, State}.
