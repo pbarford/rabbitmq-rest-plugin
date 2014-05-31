@@ -25,7 +25,6 @@ start_link() ->
 % --------------------------
 
 init([]) ->
-    io:format("rabbitmq_msg init~n"),
     {ok, Connection} = amqp_connection:start(#amqp_params_direct{}),
     %{ok, Connection} = amqp_connection:start(#amqp_params_network{}),
     {ok, Channel} = amqp_connection:open_channel(Connection),
@@ -36,24 +35,13 @@ init([]) ->
 handle_call({send, Body, Headers}, _From, State = #state{channel = Channel}) ->
     io:format("rabbitmq_msg call~n"),
     Properties = #'P_basic'{content_type = <<"text/plain">>, delivery_mode=1,headers = map_http_headers(Headers)},
-%    Properties = #'P_basic'{content_type = <<"text/plain">>, delivery_mode=1},
     BasicPublish = #'basic.publish'{exchange = <<"restInbound">>, routing_key = <<"">>},
     Content = #amqp_msg{props = Properties, payload = Body},
     amqp_channel:call(Channel, BasicPublish, Content),    
-    {reply, {ok}, State};
-
+    {reply, {201, <<"message created">>}, State};
 
 handle_call(_Msg, _From, State) ->
     {reply, unknown_command, State}.
-
-handle_cast({send, Body, Headers}, State = #state{channel = Channel}) ->
-    io:format("rabbitmq_msg cast~n"),
-    Properties = #'P_basic'{content_type = <<"text/plain">>, delivery_mode=1,headers = map_http_headers(Headers)},
-%    Properties = #'P_basic'{content_type = <<"text/plain">>, delivery_mode=1},
-    BasicPublish = #'basic.publish'{exchange = <<"restInbound">>, routing_key = <<"">>},
-    Content = #amqp_msg{props = Properties, payload = Body},
-    amqp_channel:call(Channel, BasicPublish, Content),    
-    {noreply, State};
 
 handle_cast(_, State) ->
     {noreply,State}.

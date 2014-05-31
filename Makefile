@@ -19,7 +19,7 @@ package: all
 
 get_deps:
 	${REBAR} get-deps
-	rm ./deps/cowboy/src/cowboy_http_websocket.erl
+	rm -f ./deps/cowboy/src/cowboy_http_websocket.erl
 
 all:    get_deps
 	${REBAR} compile
