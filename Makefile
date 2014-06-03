@@ -19,13 +19,13 @@ package: all
 
 get_deps:
 	${REBAR} get-deps
-	rm -f ./deps/cowboy/src/cowboy_http_websocket.erl
+	echo "{erl_opts, [ warnings_as_errors, warn_export_all, nowarn_deprecated_function ]}." > ./deps/cowboy/rebar.config
 
 all:    get_deps
-	${REBAR} compile
+	${REBAR} compile {nowarn_deprecated_function}
 
 quick:
-	${REBAR} skip_deps=true compile
+	${REBAR} skip_deps=true compile 
 
 clean:
 	${REBAR} clean
