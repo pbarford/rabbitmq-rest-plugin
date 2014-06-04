@@ -17,11 +17,18 @@ handle(Req, State) ->
 
 handle_post(Req) ->
    %io:format("COWBOY handle_post~n"),
+   {CT, Req1} = cowboy_http_req:parse_header('Content-Type', Req),
+   {Res, Rq} = case CT of
+	'error' -> {415, Req};
+	{X,Y, _} -> processRequest(erlang:iolist_to_binary([X, <<"/">>, Y]), Req1);
+	_ -> processRequest(<< "text/plain">>, Req1)
+   end,
+   cowboy_http_req:reply(Res, Rq).
+
+processRequest(ContentType, Req) ->
    {ok, Body, Req1} = cowboy_http_req:body(Req),    
    %io:format("COWBOY headers~n"),
    {HttpHeaders, Req2} = cowboy_http_req:headers(Req1),     
-   {CT, Req3} = cowboy_http_req:parse_header('Content-Type', Req2),
-   ContentType = erlang:iolist_to_binary([element(1,CT), <<"/">>, element(2,CT)]),
    %io:format("Content-Type: '~p'~n", [ContentType]),
    %io:format("HttpHeaders-Count: '~p'~n", [length(HttpHeaders)]),
    %io:format("HttpHeaders: '~p'~n", [HttpHeaders]),
@@ -29,7 +36,7 @@ handle_post(Req) ->
    %io:format("MsgHeaders: '~p'~n", [MsgHeaders]),
    %io:format("adding message: '~p'~n", [Body]),
    {Code, Text} = rabbitmq_msg:send(ContentType, Body, MsgHeaders),
-   cowboy_http_req:reply(Code, Req3).
+   {Code, Req2}.
 
 terminate(_Req, _State) ->
     ok.
