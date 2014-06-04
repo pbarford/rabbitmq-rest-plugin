@@ -3,6 +3,7 @@
 -behaviour(gen_server).
 
 -define(EXCHANGE_NAME, factory_env:get_env(exchange_name, "restExchange")).
+-define(MSG_TTL, factory_env:get_env(msg_ttl, "5000")).
 
 -export([start_link/0]).
 
@@ -32,7 +33,7 @@ init([]) ->
 
 handle_call({send, ContentType, Body, Headers}, _From, State = #state{channel = Channel}) ->
     %io:format("rabbitmq_msg call~n"),
-    Properties = #'P_basic'{content_type = ContentType, delivery_mode=1,headers = map_http_headers(Headers)},
+    Properties = #'P_basic'{content_type = ContentType, expiration= list_to_binary(?MSG_TTL), delivery_mode=1,headers = map_http_headers(Headers)},
     BasicPublish = #'basic.publish'{exchange = list_to_binary(?EXCHANGE_NAME), routing_key = <<"">>},
     Content = #amqp_msg{props = Properties, payload = Body},
     amqp_channel:call(Channel, BasicPublish, Content),    
