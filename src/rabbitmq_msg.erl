@@ -2,6 +2,8 @@
 -author('pbarford@gmail.com').
 -behaviour(gen_server).
 
+-define(EXCHANGE_NAME, factory_env:get_env(exchange_name, "restExchange")).
+
 -export([start_link/0]).
 
 -export([init/1,
@@ -24,14 +26,14 @@ init([]) ->
     {ok, Connection} = amqp_connection:start(#amqp_params_direct{}),
     %{ok, Connection} = amqp_connection:start(#amqp_params_network{}),
     {ok, Channel} = amqp_connection:open_channel(Connection),
-    amqp_channel:call(Channel, #'exchange.declare'{exchange = <<"restInbound">>,
+    amqp_channel:call(Channel, #'exchange.declare'{exchange = list_to_binary(?EXCHANGE_NAME),
                                                    type = <<"direct">>}),
     {ok, #state{channel = Channel}}.
 
 handle_call({send, ContentType, Body, Headers}, _From, State = #state{channel = Channel}) ->
     %io:format("rabbitmq_msg call~n"),
     Properties = #'P_basic'{content_type = ContentType, delivery_mode=1,headers = map_http_headers(Headers)},
-    BasicPublish = #'basic.publish'{exchange = <<"restInbound">>, routing_key = <<"">>},
+    BasicPublish = #'basic.publish'{exchange = list_to_binary(?EXCHANGE_NAME), routing_key = <<"">>},
     Content = #amqp_msg{props = Properties, payload = Body},
     amqp_channel:call(Channel, BasicPublish, Content),    
     {reply, {201, <<"message put onto rabbit">>}, State};
