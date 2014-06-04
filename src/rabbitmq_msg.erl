@@ -2,8 +2,8 @@
 -author('pbarford@gmail.com').
 -behaviour(gen_server).
 
--define(EXCHANGE_NAME, factory_env:get_env(exchange_name, "restExchange")).
--define(MSG_TTL, factory_env:get_env(msg_ttl, "5000")).
+-define(EXCHANGE_NAME, factory_env:get_env(exchange_name, "restInbound")).
+-define(MSG_TTL, factory_env:get_env(msg_ttl, "900000")).
 
 -export([start_link/0]).
 
@@ -36,8 +36,14 @@ handle_call({send, ContentType, Body, Headers}, _From, State = #state{channel = 
     Properties = #'P_basic'{content_type = ContentType, expiration= list_to_binary(?MSG_TTL), delivery_mode=1,headers = map_http_headers(Headers)},
     BasicPublish = #'basic.publish'{exchange = list_to_binary(?EXCHANGE_NAME), routing_key = <<"">>},
     Content = #amqp_msg{props = Properties, payload = Body},
-    amqp_channel:call(Channel, BasicPublish, Content),    
-    {reply, {201, <<"message put onto rabbit">>}, State};
+    Ret = case amqp_channel:call(Channel, BasicPublish, Content) of
+	 'ok' -> 
+		{201, <<"message put onto rabbit">>};
+	 _ ->
+		{500, <<"unable to publish message to rabbit">>}
+    end,	
+    %io:format("rabbitmq_msg call '~p'~n", [Ret]),
+    {reply, Ret, State};
 
 handle_call(_Msg, _From, State) ->
     {reply, unknown_command, State}.

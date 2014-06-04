@@ -4,5 +4,5 @@
   {modules, []},
   {registered, []},
   {mod, {rabbitmq_rest, []}},
-  {env, [{http_uri, "restmq"}, {http_port, 4004}, {http_listener_count, 20}, {exchange_name, "restInbound"}, {msg_ttl, "30000"}]},
-  {applications, [kernel, stdlib, cowboy, rabbit, amqp_client]}]}.
+  {env, [{http_uri, "restmq"}, {http_port, 4040}, {http_listener_count, 20}, {exchange_name, "restInbound"}, {msg_ttl, "900000"}]},
+  {applications, [kernel, stdlib, cowboy,rabbit, amqp_client]}]}.
