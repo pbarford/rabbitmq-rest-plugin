@@ -1,4 +1,4 @@
-# rabbitmq-rest-plugin #
+# RabbitMQ Restful Adapter Plugin #
 
 This plugin provides a rest adapter that clients can call to post messages to the rabbit cluster.
 
